@@ -38,7 +38,7 @@ public class PluginImpl
         }
         if ( updateCenter.getById( "sonatype-ci" ) == null )
         {
-            updateCenter.getSites().add( new UpdateSite( "sonatype-ci", "file:update-center.json" ) );
+            updateCenter.getSites().add( new UpdateSite( "sonatype-ci", "http://links.sonatype.com/products/insight/ci/update-site" ) );
         }
     }
 
