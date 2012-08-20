@@ -90,15 +90,18 @@ public final class PluginImpl
                 {
                     updateCenter.load();
                 }
+
                 for ( final UpdateSite oldSite : oldSites )
                 {
                     sites.remove( oldSite );
                 }
                 sites.addAll( newSites );
+
+                bc.commit();
             }
             finally
             {
-                bc.commit();
+                bc.abort();
             }
         }
     }
