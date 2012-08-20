@@ -15,7 +15,6 @@ import hudson.model.UpdateCenter;
 import hudson.model.UpdateSite;
 import hudson.util.PersistedList;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -28,7 +27,6 @@ public final class PluginImpl
 
     @Initializer( after = InitMilestone.EXTENSIONS_AUGMENTED, attains = "sonatype-update-sites" )
     public static void addUpdateSites()
-        throws IOException
     {
         log.info( "Adding Sonatype update site(s)" );
 
@@ -51,7 +49,6 @@ public final class PluginImpl
     }
 
     private static void addUpdateSites( final UpdateCenter updateCenter, final UpdateSite... updateSites )
-        throws IOException
     {
         final List<UpdateSite> newSites = new ArrayList<UpdateSite>();
         final List<UpdateSite> oldSites = new ArrayList<UpdateSite>();
@@ -60,23 +57,14 @@ public final class PluginImpl
         {
             final String id = newSite.getId();
             final UpdateSite oldSite = updateCenter.getById( id );
-            String action = null;
-
             if ( oldSite == null )
             {
-                action = "Adding ";
                 newSites.add( newSite );
             }
             else if ( !newSite.getUrl().equals( oldSite.getUrl() ) )
             {
-                action = "Updating ";
                 oldSites.add( oldSite );
                 newSites.add( newSite );
-            }
-
-            if ( action != null )
-            {
-                log.info( action + id + " [" + newSite.getUrl() + "]" );
             }
         }
 
@@ -93,11 +81,20 @@ public final class PluginImpl
 
                 for ( final UpdateSite oldSite : oldSites )
                 {
+                    log.info( "Removing " + oldSite.getId() + " [" + oldSite.getUrl() + "]" );
                     sites.remove( oldSite );
                 }
-                sites.addAll( newSites );
+                for ( final UpdateSite newSite : newSites )
+                {
+                    log.info( "Adding " + newSite.getId() + " [" + newSite.getUrl() + "]" );
+                    sites.add( newSite );
+                }
 
                 bc.commit();
+            }
+            catch ( final Exception e )
+            {
+                log.log( Level.WARNING, "Cannot add update sites", e );
             }
             finally
             {
