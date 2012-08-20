@@ -25,31 +25,54 @@ public class PluginImpl
 {
     private static final Logger log = Logger.getLogger( PluginImpl.class.getName() );
 
-    @Initializer( after = InitMilestone.EXTENSIONS_AUGMENTED, attains = "sonatype-ci-update-site" )
-    public static void addUpdateSite()
+    @Initializer( after = InitMilestone.EXTENSIONS_AUGMENTED, attains = "sonatype-update-sites" )
+    public static void addUpdateSites()
         throws Exception
     {
-        log.info( "Adding Sonatype CI update site" );
+        log.info( "Adding Sonatype update site(s)" );
 
         UpdateCenter updateCenter = Hudson.getInstance().getUpdateCenter();
         if ( updateCenter.getSites().isEmpty() )
         {
             updateCenter.load();
         }
-        if ( updateCenter.getById( "sonatype-ci" ) == null )
-        {
-            updateCenter.getSites().add( new UpdateSite( "sonatype-ci", "http://links.sonatype.com/products/insight/ci/update-site" ) );
-        }
+
+        addUpdateSite( updateCenter, "insight-ci", "http://links.sonatype.com/products/insight/ci/update-site" );
     }
 
-    @Initializer( requires = "sonatype-ci-update-site" )
+    @Initializer( requires = "sonatype-update-sites" )
     public static void installPlugins()
     {
-        log.info( "Installing Sonatype CI plugins" );
+        log.info( "Installing Sonatype plugin(s)" );
 
         UpdateCenter updateCenter = Hudson.getInstance().getUpdateCenter();
 
         installPlugin( updateCenter, "insight-ci" );
+    }
+
+    private static void addUpdateSite( UpdateCenter updateCenter, String name, String url )
+    {
+        if ( updateCenter.getById( name ) == null )
+        {
+            @SuppressWarnings( "static-access" )
+            Authentication authentication = Hudson.getAuthentication();
+            try
+            {
+                SecurityContextHolder.getContext().setAuthentication( ACL.SYSTEM );
+
+                log.info( "Adding " + name + "..." );
+                updateCenter.getSites().add( new UpdateSite( name, url ) );
+                log.info( "Added " + name );
+            }
+            catch ( Exception e )
+            {
+                log.log( Level.WARNING, "Cannot add " + name, e );
+            }
+            finally
+            {
+                SecurityContextHolder.getContext().setAuthentication( authentication );
+            }
+        }
     }
 
     private static void installPlugin( UpdateCenter updateCenter, String name )
