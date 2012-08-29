@@ -13,10 +13,15 @@ import hudson.init.Initializer;
 import hudson.model.Hudson;
 import hudson.model.UpdateCenter;
 import hudson.model.UpdateSite;
+import hudson.util.IOUtils;
 import hudson.util.PersistedList;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,28 +33,57 @@ public final class PluginImpl
     @Initializer( after = InitMilestone.EXTENSIONS_AUGMENTED, attains = "sonatype-update-sites" )
     public static void addUpdateSites()
     {
-        log.info( "Adding Sonatype update site(s)" );
-
-        final UpdateCenter updateCenter = Hudson.getInstance().getUpdateCenter();
-
-        final UpdateSite[] updateSites =
-            { new UpdateSite( "insight-ci", "http://links.sonatype.com/products/insight/ci/update-site" ) };
-
-        addUpdateSites( updateCenter, updateSites );
+        addUpdateSites( Hudson.getInstance().getUpdateCenter(), loadUpdateSites() );
     }
 
     @Initializer( requires = "sonatype-update-sites" )
     public static void installPlugins()
     {
-        log.info( "Installing Sonatype plugin(s)" );
-
-        final UpdateCenter updateCenter = Hudson.getInstance().getUpdateCenter();
-
-        installPlugin( updateCenter, "insight-ci" );
+        installPlugin( Hudson.getInstance().getUpdateCenter(), "insight-ci" );
     }
 
-    private static void addUpdateSites( final UpdateCenter updateCenter, final UpdateSite... updateSites )
+    @SuppressWarnings( "static-access" )
+    private static List<UpdateSite> loadUpdateSites()
     {
+        final Properties properties = new Properties();
+        final InputStream is = PluginImpl.class.getResourceAsStream( "UpdateSites.txt" );
+        try
+        {
+            properties.load( is );
+        }
+        catch ( final IOException e )
+        {
+            log.log( Level.WARNING, "Cannot load update sites", e );
+        }
+        finally
+        {
+            IOUtils.closeQuietly( is );
+        }
+
+        final List<UpdateSite> updateSites = new ArrayList<UpdateSite>( properties.size() );
+        for ( final Entry<?, ?> line : properties.entrySet() )
+        {
+            updateSites.add( new UpdateSite( (String) line.getKey(), (String) line.getValue() ) );
+        }
+        return updateSites;
+    }
+
+    private static void addUpdateSites( final UpdateCenter updateCenter, final List<UpdateSite> updateSites )
+    {
+        if ( updateCenter.getSites().isEmpty() )
+        {
+            try
+            {
+                updateCenter.load();
+            }
+            catch ( final IOException e )
+            {
+                // bail-out, we don't want to accidentally replace the entire config
+                log.log( Level.WARNING, "Cannot load UpdateCenter configuration", e );
+                return;
+            }
+        }
+
         final List<UpdateSite> newSites = new ArrayList<UpdateSite>();
         final List<UpdateSite> oldSites = new ArrayList<UpdateSite>();
 
@@ -74,10 +108,6 @@ public final class PluginImpl
             try
             {
                 final PersistedList<UpdateSite> sites = updateCenter.getSites();
-                if ( sites.isEmpty() )
-                {
-                    updateCenter.load();
-                }
 
                 for ( final UpdateSite oldSite : oldSites )
                 {
