@@ -56,6 +56,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.test.skip>true</maven.test.skip>
+    <failIfNoTests>false</failIfNoTests>
   </properties>
 
   <dependencies>
@@ -142,6 +144,17 @@
   </pluginRepositories>
 
   <profiles>
+    <profile>
+      <id>it</id>
+      <activation>
+        <property>
+          <name>it</name>
+        </property>
+      </activation>
+      <properties>
+        <maven.test.skip>false</maven.test.skip>
+      </properties>
+    </profile>
     <profile>
       <id>m2e</id>
       <activation>

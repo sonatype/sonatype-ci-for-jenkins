@@ -46,6 +46,19 @@ public final class SonatypeCI
         }
     }
 
+    private static Method dynamicDeploy;
+    {
+        try
+        {
+            dynamicDeploy = UpdateSite.Plugin.class.getDeclaredMethod( "deploy", boolean.class );
+            dynamicDeploy.setAccessible( true );
+        }
+        catch ( final Exception e )
+        {
+            dynamicDeploy = null;
+        }
+    }
+
     @Initializer( after = InitMilestone.EXTENSIONS_AUGMENTED, attains = "installed-sonatype-sites" )
     public static void installSonatypeSites()
     {
@@ -69,7 +82,7 @@ public final class SonatypeCI
             {
                 try
                 {
-                    ( (TextFile) getDataFile.invoke( site ) ).write( obj.getString( "data" ) );
+                    ( (TextFile) getDataFile.invoke( site ) ).write( obj.getString( "seed" ) );
                 }
                 catch ( final Exception e )
                 {
@@ -125,12 +138,12 @@ public final class SonatypeCI
 
                 for ( final UpdateSite oldSite : oldSites )
                 {
-                    log.info( "Removing " + oldSite.getId() + " [" + oldSite.getUrl() + "]" );
+                    log.info( "Removing site " + oldSite.getId() + " [" + oldSite.getUrl() + "]" );
                     persistedSites.remove( oldSite );
                 }
                 for ( final UpdateSite newSite : newSites )
                 {
-                    log.info( "Adding " + newSite.getId() + " [" + newSite.getUrl() + "]" );
+                    log.info( "Adding site " + newSite.getId() + " [" + newSite.getUrl() + "]" );
                     persistedSites.add( newSite );
                 }
 
@@ -158,9 +171,19 @@ public final class SonatypeCI
             {
                 try
                 {
-                    log.info( "Installing " + plugin.name + "..." );
-                    plugin.deploy().get();
-                    log.info( "Installed " + plugin.name );
+                    if ( dynamicDeploy != null )
+                    {
+                        try
+                        {
+                            dynamicDeploy.invoke( plugin, Boolean.TRUE );
+                            continue;
+                        }
+                        catch ( final Exception e )
+                        {
+                            // drop-through to old non-dynamic deploy
+                        }
+                    }
+                    plugin.deploy();
                 }
                 catch ( final Exception e )
                 {

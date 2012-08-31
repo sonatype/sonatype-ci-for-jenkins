@@ -1,7 +1,38 @@
-[
-  {
+[{
+  "id" : "insight-ci",
+  "url" : "http://links.sonatype.com/products/insight/ci/jenkins-update-site",
+  "seed" : {
     "id" : "insight-ci",
-    "url" : "http://links.sonatype.com/products/insight/ci/jenkins-update-site",
-    "data" : ""
+    "plugins" : {
+      "insight-ci" : {
+        "name" : "insight-ci",
+        "type" : "others",
+        "version" : "2.2",
+        "dependencies" : [],
+        "buildDate" : "Aug 29, 2012",
+        "developers" : [ {
+          "name" : "Sonatype",
+          "developerId" : "null",
+          "email" : "null"
+        } ],
+        "excerpt" : "<a href='http://links.sonatype.com/products/insight/ci/home'>Insight for CI</a> helps you find and fix license, security and quality problems quickly.",
+        "labels" : [ "report" ],
+        "previousTimestamp" : "",
+        "releaseTimestamp" : "2012-08-29T20:25:08Z",
+        "previousVersion" : "",
+        "scm" : "",
+        "title" : "Insight for CI plugin",
+        "url" : "http://hudson-ci.org/downloads/plugins/insight-ci/2.2/insight-ci.hpi",
+        "wiki" : "http://wiki.hudson-ci.org/display/HUDSON/Insight+for+CI+plugin"
+      }
+    },
+    "updateCenterVersion" : "1",
+    "connectionCheckUrl" : "http://www.google.com/",
+    "core" : {
+      "name" : "core",
+      "version" : "1.395.1",
+      "buildDate" : "Mar 08, 2011",
+      "url" : "http://updates.jenkins-ci.org/download/war/1.395.1/hudson.war"
+    }
   }
-]
+}]
