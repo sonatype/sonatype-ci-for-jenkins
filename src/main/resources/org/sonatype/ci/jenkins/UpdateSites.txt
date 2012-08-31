@@ -1,1 +1,0 @@
-insight-ci = http://links.sonatype.com/products/insight/ci/jenkins-update-site
