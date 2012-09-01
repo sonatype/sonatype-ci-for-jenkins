@@ -7,9 +7,9 @@
       "insight-ci" : {
         "name" : "insight-ci",
         "type" : "others",
-        "version" : "2.2",
+        "version" : "2.2.1",
         "dependencies" : [],
-        "buildDate" : "Aug 29, 2012",
+        "buildDate" : "Aug 31, 2012",
         "developers" : [ {
           "name" : "Sonatype",
           "developerId" : "null",
@@ -17,12 +17,12 @@
         } ],
         "excerpt" : "<a href='http://links.sonatype.com/products/insight/ci/home'>Insight for CI</a> helps you find and fix license, security and quality problems quickly.",
         "labels" : [ "report" ],
-        "previousTimestamp" : "",
-        "releaseTimestamp" : "2012-08-29T20:25:08Z",
-        "previousVersion" : "",
+        "previousTimestamp" : "2012-08-29T20:25:08Z",
+        "releaseTimestamp" : "2012-08-31T23:58:52Z",
+        "previousVersion" : "2.2",
         "scm" : "",
         "title" : "Insight for CI plugin",
-        "url" : "http://hudson-ci.org/downloads/plugins/insight-ci/2.2/insight-ci.hpi",
+        "url" : "http://hudson-ci.org/downloads/plugins/insight-ci/2.2.1/insight-ci.hpi"
         "wiki" : "http://wiki.hudson-ci.org/display/HUDSON/Insight+for+CI+plugin"
       }
     },
