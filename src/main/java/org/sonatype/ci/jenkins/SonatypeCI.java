@@ -180,6 +180,7 @@ public final class SonatypeCI
                         }
                         catch ( final Exception e )
                         {
+                            log.log( Level.WARNING, "Restart needed to complete install of " + plugin.name );
                             // drop-through to old non-dynamic deploy
                         }
                     }
