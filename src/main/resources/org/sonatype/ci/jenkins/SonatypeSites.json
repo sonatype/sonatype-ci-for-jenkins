@@ -22,7 +22,7 @@
         "previousVersion" : "2.2",
         "scm" : "",
         "title" : "Insight for CI plugin",
-        "url" : "http://hudson-ci.org/downloads/plugins/insight-ci/2.2.1/insight-ci.hpi"
+        "url" : "http://hudson-ci.org/downloads/plugins/insight-ci/2.2.1/insight-ci.hpi",
         "wiki" : "http://wiki.hudson-ci.org/display/HUDSON/Insight+for+CI+plugin"
       }
     },
