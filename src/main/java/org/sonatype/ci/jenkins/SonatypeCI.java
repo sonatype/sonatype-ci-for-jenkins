@@ -33,6 +33,8 @@ public final class SonatypeCI
 {
     private static final Logger log = Logger.getLogger( SonatypeCI.class.getName() );
 
+    private static boolean installFeaturedPlugins;
+
     private static Method getDataFile;
     {
         try
@@ -68,7 +70,10 @@ public final class SonatypeCI
     @Initializer( requires = "installed-sonatype-sites", attains = "installed-sonatype-plugins" )
     public static void installSonatypePlugins()
     {
-        installPlugins( "insight-ci" );
+        if ( installFeaturedPlugins )
+        {
+            installPlugins( "insight-ci" );
+        }
     }
 
     @SuppressWarnings( "unchecked" )
@@ -148,6 +153,8 @@ public final class SonatypeCI
                 }
 
                 bc.commit();
+
+                installFeaturedPlugins = true;
             }
             catch ( final Exception e )
             {
