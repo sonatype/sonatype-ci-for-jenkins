@@ -15,12 +15,12 @@ import hudson.model.UpdateCenter;
 import hudson.model.UpdateSite;
 import hudson.util.IOUtils;
 import hudson.util.PersistedList;
-import hudson.util.TextFile;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,31 +35,7 @@ public final class SonatypeCI
 
     private static boolean installFeaturedPlugins;
 
-    private static Method getDataFile;
-    {
-        try
-        {
-            getDataFile = UpdateSite.class.getDeclaredMethod( "getDataFile" );
-            getDataFile.setAccessible( true );
-        }
-        catch ( final Exception e )
-        {
-            getDataFile = null;
-        }
-    }
-
-    private static Method dynamicDeploy;
-    {
-        try
-        {
-            dynamicDeploy = UpdateSite.Plugin.class.getDeclaredMethod( "deploy", boolean.class );
-            dynamicDeploy.setAccessible( true );
-        }
-        catch ( final Exception e )
-        {
-            dynamicDeploy = null;
-        }
-    }
+    private static Method _dynamicDeploy;
 
     @Initializer( after = InitMilestone.EXTENSIONS_AUGMENTED, attains = "installed-sonatype-sites" )
     public static void installSonatypeSites()
@@ -76,18 +52,17 @@ public final class SonatypeCI
         }
     }
 
-    @SuppressWarnings( "unchecked" )
     private static List<UpdateSite> seedSites( final String name )
     {
         final List<UpdateSite> sites = new ArrayList<UpdateSite>();
-        for ( final JSONObject obj : (List<JSONObject>) (List<?>) getResourceAsJSONArray( name ) )
+        for ( final JSONObject obj : getResourceAsListOfJSON( name ) )
         {
-            final UpdateSite site = new UpdateSite( obj.getString( "id" ), obj.getString( "url" ) );
-            if ( site.getData() == null && getDataFile != null )
+            final SonatypeSite site = new SonatypeSite( obj.getString( "id" ), obj.getString( "url" ) );
+            if ( site.getData() == null )
             {
                 try
                 {
-                    ( (TextFile) getDataFile.invoke( site ) ).write( obj.getString( "seed" ) );
+                    site._getDataFile().write( obj.getString( "seed" ) );
                 }
                 catch ( final Exception e )
                 {
@@ -125,9 +100,11 @@ public final class SonatypeCI
             final UpdateSite oldSite = updateCenter.getById( id );
             if ( oldSite == null )
             {
+                // first time installation
+                installFeaturedPlugins = true;
                 newSites.add( newSite );
             }
-            else if ( !newSite.getUrl().equals( oldSite.getUrl() ) )
+            else if ( !oldSite.getUrl().equals( newSite.getUrl() ) )
             {
                 oldSites.add( oldSite );
                 newSites.add( newSite );
@@ -153,8 +130,6 @@ public final class SonatypeCI
                 }
 
                 bc.commit();
-
-                installFeaturedPlugins = true;
             }
             catch ( final Exception e )
             {
@@ -178,20 +153,7 @@ public final class SonatypeCI
             {
                 try
                 {
-                    if ( dynamicDeploy != null )
-                    {
-                        try
-                        {
-                            dynamicDeploy.invoke( plugin, Boolean.TRUE );
-                            continue;
-                        }
-                        catch ( final Exception e )
-                        {
-                            log.log( Level.WARNING, "Restart needed to complete install of " + plugin.name );
-                            // drop-through to old non-dynamic deploy
-                        }
-                    }
-                    plugin.deploy();
+                    _dynamicDeploy( plugin );
                 }
                 catch ( final Exception e )
                 {
@@ -201,21 +163,54 @@ public final class SonatypeCI
         }
     }
 
-    @SuppressWarnings( "static-access" )
-    private static JSONArray getResourceAsJSONArray( final String name )
+    @SuppressWarnings( { "static-access", "rawtypes", "unchecked" } )
+    private static List<JSONObject> getResourceAsListOfJSON( final String name )
     {
         final InputStream is = SonatypeCI.class.getResourceAsStream( name );
         try
         {
-            return JSONArray.fromObject( IOUtils.toString( is, "UTF-8" ) );
+            return (List) JSONArray.fromObject( IOUtils.toString( is, "UTF-8" ) );
         }
         catch ( final IOException e )
         {
-            return new JSONArray();
+            return Collections.emptyList();
         }
         finally
         {
             IOUtils.closeQuietly( is );
+        }
+    }
+
+    private static void _dynamicDeploy( final UpdateSite.Plugin plugin )
+    {
+        if ( _dynamicDeploy != null )
+        {
+            try
+            {
+                _dynamicDeploy.invoke( plugin, Boolean.TRUE );
+                return;
+            }
+            catch ( final Exception e )
+            {
+                log.log( Level.WARNING, "Restart needed to complete install of " + plugin.name );
+                // drop-through to old non-dynamic deploy
+            }
+        }
+        plugin.deploy();
+    }
+
+    static
+    {
+        UpdateCenter.XSTREAM.alias( "sonatype", SonatypeSite.class );
+
+        try
+        {
+            _dynamicDeploy = UpdateSite.Plugin.class.getDeclaredMethod( "deploy", boolean.class );
+            _dynamicDeploy.setAccessible( true );
+        }
+        catch ( final Exception e )
+        {
+            _dynamicDeploy = null;
         }
     }
 }
