@@ -22,9 +22,11 @@
   <name>Sonatype CI Plugins</name>
 
   <description>
-    This plugin installs the following enterprise plugins from Sonatype:
+    This plugin extends the Update Center and installs the following proprietary plugins from Sonatype:
 
     * Insight-CI: helps you find and fix license, security and quality problems quickly
+
+    Note: These plugins are free for basic use, but advanced features may require purchase of a token.
   </description>
 
   <url>https://wiki.jenkins-ci.org/display/JENKINS/Sonatype+CI+Plugins</url>
