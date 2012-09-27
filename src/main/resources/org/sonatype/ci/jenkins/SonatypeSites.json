@@ -8,9 +8,9 @@
     "plugins" : {
       "insight-ci" : {
         "name" : "insight-ci",
-        "version" : "2.2.1",
+        "version" : "2.2.2",
         "title" : "Insight for CI plugin",
-        "url" : "http://hudson-ci.org/downloads/plugins/insight-ci/2.2.1/insight-ci.hpi",
+        "url" : "http://hudson-ci.org/downloads/plugins/insight-ci/2.2.2/insight-ci.hpi",
         "excerpt" : "<a href='http://links.sonatype.com/products/insight/ci/home'>Insight for CI</a> helps you find and fix license, security and quality problems quickly.",
         "wiki" : "http://wiki.hudson-ci.org/display/HUDSON/Insight+for+CI+plugin",
         "requiredCore" : "1.395",
