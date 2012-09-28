@@ -11,6 +11,7 @@ import hudson.model.UpdateSite;
 import hudson.util.FormValidation;
 import hudson.util.IOUtils;
 import hudson.util.TextFile;
+import hudson.util.VersionNumber;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,6 +85,19 @@ public final class SonatypeSite
     public boolean hasUpdates()
     {
         return false; // no need to repeat the update check, core implementation searches everything already
+    }
+
+    boolean needsUpdate( String version )
+    {
+        try
+        {
+            final String seedVersion = JSONObject.fromObject( _getDataFile().read() ).getString( "seedVersion" );
+            return seedVersion == null || new VersionNumber( version ).isNewerThan( new VersionNumber( seedVersion ) );
+        }
+        catch ( final Exception e )
+        {
+            return true;
+        }
     }
 
     private static boolean updatePlugin( final JSONObject plugin, final String newVersion )

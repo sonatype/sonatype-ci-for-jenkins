@@ -1,10 +1,12 @@
 [{
   "id" : "insight-ci",
   "url" : "http://links.sonatype.com/products/insight/ci/jenkins-plugins",
+  "seedVersion" : "${project.version}",
   "seed" : {
     "id" : "insight-ci",
     "updateCenterVersion" : "1",
     "connectionCheckUrl" : "http://www.google.com/",
+    "seedVersion" : "${project.version}",
     "plugins" : {
       "insight-ci" : {
         "name" : "insight-ci",
