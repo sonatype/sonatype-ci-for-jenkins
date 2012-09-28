@@ -87,7 +87,7 @@ public final class SonatypeSite
         return false; // no need to repeat the update check, core implementation searches everything already
     }
 
-    boolean needsUpdate( String version )
+    boolean needsSeedUpdate( String version )
     {
         try
         {

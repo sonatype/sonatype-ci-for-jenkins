@@ -58,7 +58,7 @@ public final class SonatypeCI
         for ( final JSONObject obj : getResourceAsListOfJSON( name ) )
         {
             final SonatypeSite site = new SonatypeSite( obj.getString( "id" ), obj.getString( "url" ) );
-            if ( site.getData() == null || site.needsUpdate( obj.getString( "seedVersion" ) ) )
+            if ( site.getData() == null || site.needsSeedUpdate( obj.getString( "seedVersion" ) ) )
             {
                 try
                 {
